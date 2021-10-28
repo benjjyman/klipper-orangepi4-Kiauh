@@ -1,52 +1,59 @@
 # klipper orangepi 4
  
-
-Install
-
+first github expierence so  formatting isnt great, this purely created as reference for my future self, but shared as it may help someone.
+ 
+####################
+Install via KIAUH 
+##################
 Use KIAUH to install klipper, moonraker and Fluidd as normal https://github.com/th33xitus/KIAUH
 
-TMC2209
+following prompts there isnt anything different except the following changes.
 
+###############
+TMC2209
+###############
 Intial setup for SKR1.4 is set to Tmc2208, need to change to Tmc2209
 
+to be inserted after each stepper inside printer.cfg:
 
-#############################
+#
 [tmc2209 extruder]
-uart_pin: P1.4
+uart_pin: P1.4 # every different stepper has a different uart pin, although by changing resistors on each stepstick its possible to address 4 drivers on one pin
 interpolate: true
 run_current: 0.5
 hold_current: 0.25
 sense_resistor: 0.110
 stealthchop_threshold: 0 # 0 to force  SPREADCYCLE / SET TO 999999 TO force STEALTHCHOP/ set 100 to switch from STEALTHCHOP TO SPREADCYCLE AT SPEEDS ABOVE 100
-#########################
+#
 
-BLTOUCH 
 
+
+###############################
+BLTOUCH with an AC heated bed
+################################
 Bltouch uses a Hall-effect sesnor which is prone to noisey signals at the influence of an AC heated bed, so use HOMING_HEATERS on Z axis to
 reduce interference at the expense of the bed cooling whilst doing bed mesh, so keep to a small sample size 3x3 opposed to 11x11, and use fast travel speeds along x,y axis.
 
-#########################
-
+to be inserted in printer.cfg:
+#
 [homing_heaters]
 steppers: stepper_z
-#   A comma separated list of steppers that should cause heaters to be
-#   disabled. The default is to disable heaters for any homing/probing
-#   move.
-#   Typical example: stepper_z
+#   
 heaters: heater_bed
-#   A comma separated list of heaters to disable during homing/probing
-#   moves. The default is to disable all heaters.
-#   Typical example: extruder, heater_bed
-###########################
+# 
+   
+POSSIBLEY LOOK AT HOMING OVERRIDE INSTEAD OF SAFE HOMING TO LIFT Z TO STOP BLTOUCH COLLISIONS
 
-############POSSIBLEY LOOK AT HOMING OVERRIDE INSTEAD OF SAFE HOMING TO LIFT Z TO STOP BLTOUCH COLLISIONS
 
+
+################
 Display on CR10s 
-
+#################
 on original board the display uses 2 ribbon cabbles on EX1 & EX2 but to get it to work with SKR1.4 use a single cable from EX1 to EX3 on display 
 an Ender3
 
-##########################
+to be set in printer.cfg:
+##
 [board_pins]
 aliases:
     # EXP1 header
@@ -70,11 +77,11 @@ pin: EXP1_1
 
 
 ##########################
-
-ORANGEPI CPU TEMPERATURES
-
+ORANGEPI-4 CPU TEMPERATURES
 ##########################
-
+ the below values work for orangepi4, I have orange pi zero lts commands elsewhere will add them here soon.
+to be inserted in printer.cfg:
+ 
 [temperature_sensor orange_pi_1]
 sensor_type: temperature_host
 min_temp: 5
@@ -88,7 +95,8 @@ min_temp: 5
 max_temp: 100
 
 ##########################
-
+resonance using adxl3455
+##########################
 
 RESONANCE MEASUREMENT USING ORANGE PI 4
 
@@ -98,63 +106,68 @@ Orange PI differs from Raspberry pi in GPIO pins and SPI names so changes need t
 https://neonaut.neocities.org/blog/2018/orange-pi-i2c-spi-setup.html
 Enabling SPI
 Enable the hardware through config:
-
 sudo armbian-config
 switch on SPI in System>Hardware>SPI-spidev   & save 
 
-Update /etc/modules 
-
+Update /etc/modules:
 sudo nano /etc/modules
 
 to include the following line:
-
 spi-dev
 
-Update /boot/armbianEnv.txt 
-
+Update /boot/armbianEnv.txt :
 sudo nano /boot/armbianEnv.txt
 
 to include the following:
-
-param_spidev_spi_bus=1           ###########origianl is 0 but the resonance measurement.py module expects 1 so easier to fix here
+param_spidev_spi_bus=1           #origianl is 0 but the resonance measurement.py module expects 1 so easier to fix here
 param_spidev_max_freq=100000000
 
-You may need to update the device-tree overlay as well. (Info for H5.) [I don’t think I needed this for OP0 which is H2, just the OP PC2] Additionally, if you reset you’ll want to check and make sure the changes are still there.
 
 The commands to verify the SPI bus should return output like:
-
 $ ls /dev/spi*
-/dev/spidev0.0
+/dev/spidev1.0
 $ ls -l /dev/spi*
 crw——- 1 root root 153, 0 Aug 25 11:05 /dev/spidev1.0
 
-
 $ lsmod | grep -i spi
-spidev 20480 0
+spidev 20480 1
 
-Connected pins on ORANGEPI4 
+Connected pins on ORANGEPI4:
 
-ORANGEPI4 MANUAL PAGE 75
+reference to ORANGEPI4 MANUAL PAGE 75
 
 http://www.orangepi.org/downloadresources/ 
 SCROLL DOWN TO ORANGEPI 4 MANUAL , SELECT GOOGLEDRIVE
 
-pin 2 5V
-pin 9 GND
-pin 19 SPI1_TXD
-pin 21 SPI1_RXD
-pin 23 SPI1_CLK
-pin 23 SPI1_CS
+ orangepi4 ---------------ADXL345
+pin 2 5V                  vcc
+pin 9 GND                 gnd             
+pin 19 SPI1_TXD           sda
+pin 21 SPI1_RXD           sdo
+pin 23 SPI1_CLK           scl
+pin 23 SPI1_CS            cs
 
-OTHER END CONNECTED TO ADXL345 AS MARKED
+ADXL345 markings may be slightly different, tx on pi should go to rx on adxl & rx on pi should go tx on adxl the rest should be straight connections
 
 https://www.klipper3d.org/Measuring_Resonances.html
-OTHER CHANGES FROM WEBSITE   ARMBIAN WILL ONLY WORK WITH PYTHON3 SO THE CHANGES BELLOW NEED TO BE INCLUDED:
-
+other changes from klipper website which is for a raspberrypi include:
+ 
+ Armbian will only work with Python3, unless we find an older version we have to use this workaround:
 sudo apt install python3-numpy python3-matplotlib
+ 
+ we need to edit ~/klipper/scripts :
+nano ~/klipper/scripts/cal.py
+ 
+ change:
+ #!/usr/bin/env python2
+ 
+ to: 
+ #!/usr/bin/env python3
+ 
+ (this will allow numpy matp-lotlib etc to work (there may be other *.py *.sh apps that also need to be setup to run python3)
 
-########################
-
+ to be inserted into printer.cfg:
+#
 [mcu rpi]
 serial: /tmp/klipper_host_mcu
 
@@ -166,47 +179,40 @@ probe_points:
 
 [adxl345]
 cs_pin:rpi:None
-#   The SPI enable pin for the sensor. This parameter must be provided.
+#  The SPI enable pin for the sensor. This parameter must be provided.
 spi_speed: 5000000
-#   The SPI speed (in hz) to use when communicating with the chip.
-#   The default is 5000000.
 spi_bus:spidev1.0
-#spi_software_sclk_pin:SPI0_CLK
-#spi_software_mosi_pin:SPI0_RXD
-#spi_software_miso_pin:SPI0_TXD
-#   See the "common SPI settings" section for a description of the
-#   above parameters.
-#axes_map: x,y,z
-#   The accelerometer axis for each of the printer's x, y, and z axes.
-#   This may be useful if the accelerometer is mounted in an
-#   orientation that does not match the printer orientation. For
-#   example, one could set this to "y,x,z" to swap the x and y axes.
-#   It is also possible to negate an axis if the accelerometer
-#   direction is reversed (eg, "x,z,-y"). The default is "x,y,z".
-#rate: 3200
-#   Output data rate for ADXL345. ADXL345 supports the following data
-#   rates: 3200, 1600, 800, 400, 200, 100, 50, and 25. Note that it is
-#   not recommended to change this rate from the default 3200, and
-#   rates below 800 will considerably affect the quality of resonance
-#   measurements.
+
 
 ########################
-WEBCAM 
-
+WEBCAM section
+#######################
 WEBCAM /dev/video* 
 seems to bounce around in number from 0,2,3,4 maybe issue with usb and mjpegstreamer?? used some other streamer on octocitrico?
 
+ 
+to be inserted/changed in webcam.txt:
 camera="usb"
 
 camera_usb_options="-d /dev/video0 -r 640x480 -f 10 -rot 270"
 
-
-included files :
+ 
+ 
+##################
+ end of changes
+ #################
+things to do:
+ 
+ sort out webcam to a stable number
+ add wiringop or op.gpio to enable relay to shut off printer and power switch localy to turn printer on for maintenance
+ add switch to shutdown pi
+ 
+ included files :
 
 printer.cfg 
 bltouch.cfg (had to include Z homing offsets within printer.cfg as SAVE_CONFIG only writes updates if it can find settings inside printer.cfg)
 webcam.txt
 kiauh_macros.cfg
 extruder.cfg (had to include extruder within printer.cfg as SAVE_CONFIG only writes updates if it can find settings inside printer.cfg)
-############insert printer.cfg here
+
 
