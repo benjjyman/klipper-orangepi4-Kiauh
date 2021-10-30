@@ -194,8 +194,34 @@ seems to bounce around in number from 0,2,3,4 maybe issue with usb and mjpegstre
 to be inserted/changed in webcam.txt:
 camera="usb"
 
-camera_usb_options="-d /dev/video0 -r 640x480 -f 10 -rot 270"
+camera_usb_options="-d /dev/video0 -r 640x480 -f 10 -rot 270"cameravideo* to /dev/video0 
+ then "-d /dev/video0 -r 640x480 1-f 10 -rot 270"cameravideo* to /dev/video1
+ "-d /dev/video0 -r 640x480 2-f 10 -rot 270"cameravideo* to /dev/video2
+ 
 
+create copies of webcam.txt and rename to webcam1.txt,webcam2.txt,webcam3.txt .... etc
+ 
+ cd ~/klipper_config/
+ 
+ cp webcam.txt webcam1.txt
+ cp webcam.txt webcam2.txt
+ cp webcam.txt webcam3.txt
+ 
+ use fluidd to edit each webcam*.txt
+ 
+ change camera="auto" to camer="usb"
+ 
+ uncomment
+ camera_usb_options="-d /dev/video0 -r 640x480 -f 10 -rot 270"
+ 
+ and starting with webcam.txt increment  /dev/video* to /dev/video0 
+ then  edit webcam1.txt to  /dev/video* to /dev/video1
+ then  edit webcam2.txt to  /dev/video* to /dev/video2
+ then  edit webcam3.txt to  /dev/video* to /dev/video3
+ 
+ that seems to cope with the random assigning of numbers to webcam, atleast untill I get more time to look at the problem.
+ 
+ 
  
  
 ##################
@@ -203,15 +229,16 @@ camera_usb_options="-d /dev/video0 -r 640x480 -f 10 -rot 270"
  #################
 things to do:
  
- sort out webcam to a stable number
- add wiringop or op.gpio to enable relay to shut off printer and power switch localy to turn printer on for maintenance
- add switch to shutdown pi
+ sort out webcam t edit o a stable ntod wiringop or op.gpio to enable relay to shut off printer and power switch localy to turn printer on for maintenance
  
- included files :
+ sort out add switch tton pitoded files :
 
+ sort out 
+ 
+ that seems to cope with the random assigning of numbers to webcam, atleast untill I get more time to look at the problem.
 printer.cfg 
-bltouch.cfg (had to include Z homing offsets within printer.cfg as SAVE_CONFIG only writes updates if it can find settings inside printer.cfg)
-webcam.txt
+3
+bltouch.cfg (had to include Z homing offsets within printer.cfg as SAVE_CONFIG only writes updates if it can find settings ebcam.txt
 kiauh_macros.cfg
 extruder.cfg (had to include extruder within printer.cfg as SAVE_CONFIG only writes updates if it can find settings inside printer.cfg)
 
