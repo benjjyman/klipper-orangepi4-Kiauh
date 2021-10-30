@@ -164,7 +164,7 @@ nano ~/klipper/scripts/cal.py
  to: 
  #!/usr/bin/env python3
  
- (this will allow numpy matp-lotlib etc to work (there may be other *.py *.sh apps that also need to be setup to run python3)
+ (this will allow numpy matp-lotlib etc to work ,there may be other *.py *.sh apps that also need to be setup to run python3)
 
  to be inserted into printer.cfg:
 #
@@ -179,7 +179,6 @@ probe_points:
 
 [adxl345]
 cs_pin:rpi:None
-#  The SPI enable pin for the sensor. This parameter must be provided.
 spi_speed: 5000000
 spi_bus:spidev1.0
 
